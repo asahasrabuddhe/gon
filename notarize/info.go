@@ -39,7 +39,7 @@ type Info struct {
 
 // info requests the information about a notarization and returns
 // the updated information.
-func info(ctx context.Context, uuid string, opts *Options) (*Info, error) {
+func info(_ context.Context, uuid string, opts *Options) (*Info, error) {
 	logger := opts.Logger
 	if logger == nil {
 		logger = hclog.NewNullLogger()

@@ -69,17 +69,17 @@ func statusPrefixList(items []*item) []string {
 
 	// Create a list of basenames and also keep track of max length
 	result := make([]string, len(items))
-	max := 0
+	maxLen := 0
 	for idx, f := range items {
 		result[idx] = filepath.Base(f.Path)
-		if l := len(result[idx]); l > max {
-			max = l
+		if l := len(result[idx]); l > maxLen {
+			maxLen = l
 		}
 	}
 
 	// Pad all the strings to the max length
 	for idx, _ := range result {
-		result[idx] += strings.Repeat(" ", max-len(result[idx]))
+		result[idx] += strings.Repeat(" ", maxLen-len(result[idx]))
 		result[idx] = fmt.Sprintf("[%s] ", result[idx])
 	}
 

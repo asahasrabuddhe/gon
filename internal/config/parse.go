@@ -2,7 +2,6 @@ package config
 
 import (
 	"io"
-	"io/ioutil"
 
 	"github.com/hashicorp/hcl/v2/hclsimple"
 )
@@ -21,7 +20,7 @@ func ParseFile(filename string) (*Config, error) {
 //
 // format is either "hcl" or "json"
 func Parse(r io.Reader, filename, format string) (*Config, error) {
-	src, err := ioutil.ReadAll(r)
+	src, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}

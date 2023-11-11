@@ -62,6 +62,12 @@ func log(ctx context.Context, uuid string, opts *Options) (*Log, error) {
 			return nil, err
 		}
 		cmd.Path = path
+
+		cmd = *(exec.CommandContext(
+			ctx, path,
+			filepath.Base(cmd.Path), "notarytool", "log", uuid,
+			"--apple-id", opts.DeveloperId, "--password", opts.Password, "--team-id", opts.Provider,
+		))
 	}
 
 	cmd.Args = []string{

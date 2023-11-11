@@ -60,7 +60,8 @@ func Sign(ctx context.Context, opts *Options) error {
 		if err != nil {
 			return err
 		}
-		cmd.Path = path
+
+		cmd = *(exec.CommandContext(ctx, path, "codesign", "-s", opts.Identity, "-f", "-v", "--timestamp", "--options", "runtime"))
 	}
 
 	cmd.Args = []string{

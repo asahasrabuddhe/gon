@@ -14,7 +14,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -97,7 +96,7 @@ func Dmg(ctx context.Context, opts *Options) error {
 	// inject our files.
 	root := opts.Root
 	if root == "" {
-		td, err := ioutil.TempDir("", "gon")
+		td, err := os.MkdirTemp("", "gon")
 		if err != nil {
 			return err
 		}

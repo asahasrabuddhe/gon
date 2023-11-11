@@ -21,11 +21,11 @@ func TestInfo_accepted(t *testing.T) {
 		BaseCmd: childCmd(t, "info-accepted"),
 	})
 
-	require := require.New(t)
-	require.NoError(err)
-	require.Equal(info.RequestUUID, "32684f68-d63e-49ba-9234-25eeec84b369")
-	require.Equal(info.Status, "Accepted")
-	require.Equal(info.StatusMessage, "Successfully received submission info")
+	req := require.New(t)
+	req.NoError(err)
+	req.Equal(info.RequestUUID, "32684f68-d63e-49ba-9234-25eeec84b369")
+	req.Equal(info.Status, "Accepted")
+	req.Equal(info.StatusMessage, "Successfully received submission info")
 }
 
 func TestInfo_invalid(t *testing.T) {
@@ -34,10 +34,10 @@ func TestInfo_invalid(t *testing.T) {
 		BaseCmd: childCmd(t, "info-invalid"),
 	})
 
-	require := require.New(t)
-	require.NoError(err)
-	require.Equal(info.RequestUUID, "cfd69166-8e2f-1397-8636-ec06f98e3597")
-	require.Equal(info.Status, "Invalid")
+	req := require.New(t)
+	req.NoError(err)
+	req.Equal(info.RequestUUID, "cfd69166-8e2f-1397-8636-ec06f98e3597")
+	req.Equal(info.Status, "Invalid")
 }
 
 // testCmdInfoAcceptedSubmission mimicks an accepted submission.

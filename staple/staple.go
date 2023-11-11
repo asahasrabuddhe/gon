@@ -46,14 +46,8 @@ func Staple(ctx context.Context, opts *Options) error {
 		if err != nil {
 			return err
 		}
-		cmd.Path = path
-	}
 
-	cmd.Args = []string{
-		filepath.Base(cmd.Path),
-		"stapler",
-		"staple",
-		opts.File,
+		cmd = *(exec.CommandContext(ctx, path, filepath.Base(cmd.Path), "stapler", "staple", opts.File))
 	}
 
 	// We store all output in out for logging and in case there is an error

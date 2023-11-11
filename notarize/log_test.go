@@ -21,13 +21,13 @@ func TestLog_accepted(t *testing.T) {
 		BaseCmd: childCmd(t, "log-accepted"),
 	})
 
-	require := require.New(t)
-	require.NoError(err)
-	require.Equal(log.JobId, "3382aa04-e417-46a0-b1b4-42eebf85906c")
-	require.Equal(log.Status, "Accepted")
-	require.Equal(log.StatusSummary, "Ready for distribution")
-	require.Equal(len(log.Issues), 0)
-	require.Equal(len(log.TicketContents), 1)
+	req := require.New(t)
+	req.NoError(err)
+	req.Equal(log.JobId, "3382aa04-e417-46a0-b1b4-42eebf85906c")
+	req.Equal(log.Status, "Accepted")
+	req.Equal(log.StatusSummary, "Ready for distribution")
+	req.Equal(len(log.Issues), 0)
+	req.Equal(len(log.TicketContents), 1)
 }
 
 func TestLog_invalid(t *testing.T) {
@@ -36,13 +36,13 @@ func TestLog_invalid(t *testing.T) {
 		BaseCmd: childCmd(t, "log-invalid"),
 	})
 
-	require := require.New(t)
-	require.NoError(err)
-	require.Equal(log.JobId, "4ba7c420-7444-44bc-a190-1bd4bad97b13")
-	require.Equal(log.Status, "Invalid")
-	require.Equal(log.StatusSummary, "Archive contains critical validation errors")
-	require.Equal(len(log.TicketContents), 0)
-	require.Equal(len(log.Issues), 3)
+	req := require.New(t)
+	req.NoError(err)
+	req.Equal(log.JobId, "4ba7c420-7444-44bc-a190-1bd4bad97b13")
+	req.Equal(log.Status, "Invalid")
+	req.Equal(log.StatusSummary, "Archive contains critical validation errors")
+	req.Equal(len(log.TicketContents), 0)
+	req.Equal(len(log.Issues), 3)
 }
 
 // testCmdLogValidSubmission mimicks an accepted submission.

@@ -3,6 +3,7 @@ package notarize
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"sync"
@@ -89,19 +90,24 @@ func Notarize(ctx context.Context, opts *Options) (*Info, *Log, error) {
 	// code of 1519 (UUID not found), then we are stuck in a queue. Sometimes
 	// this queue is hours long. We just have to wait.
 	infoResult := &Info{RequestUUID: uuid}
+	ticker := time.NewTicker(10 * time.Second)
 	for {
-		time.Sleep(10 * time.Second)
-		_, err := info(ctx, infoResult.RequestUUID, opts)
+		<-ticker.C
+
+		_, err = info(ctx, infoResult.RequestUUID, opts)
 		if err == nil {
+			ticker.Stop()
 			break
 		}
 
 		// If we got error code 1519 that means that the UUID was not found.
 		// This means we're in a queue.
-		if e, ok := err.(Errors); ok && e.ContainsCode(1519) {
+		var e Errors
+		if errors.As(err, &e) && e.ContainsCode(1519) {
 			continue
 		}
 
+		ticker.Stop()
 		// A real error, just return that
 		return infoResult, nil, err
 	}
@@ -110,19 +116,18 @@ func Notarize(ctx context.Context, opts *Options) (*Info, *Log, error) {
 	// waiting for the analysis to complete. This usually happens within
 	// minutes.
 	for {
-		// Update the info. It is possible for this to return a nil info
-		// and we dont' ever want to set result to nil so we have a check.
-		newInfoResult, err := info(ctx, infoResult.RequestUUID, opts)
-		if newInfoResult != nil {
-			infoResult = newInfoResult
-		}
-
+		// Update the info. It is possible for this to return a nil info, and we don't ever want to set result to nil,
+		// so we have a check.
+		infoResult, err = info(ctx, infoResult.RequestUUID, opts)
 		if err != nil {
-			// This code is the network became unavailable error. If this
-			// happens then we just log and retry.
-			if e, ok := err.(Errors); ok && e.ContainsCode(-19000) {
+			// This code is the network became unavailable error. If this happens then we just log and retry.
+			var e Errors
+			if errors.As(err, &e) && e.ContainsCode(-19000) {
 				logger.Warn("error that network became unavailable, will retry")
-				goto RETRYINFO
+				// Wait for 5 seconds and try again. I haven't yet found any rate limits to the service so this
+				// seems okay.
+				<-time.After(5 * time.Second)
+				continue
 			}
 
 			return infoResult, nil, err
@@ -134,28 +139,23 @@ func Notarize(ctx context.Context, opts *Options) (*Info, *Log, error) {
 		if infoResult.Status == "Accepted" || infoResult.Status == "Invalid" {
 			break
 		}
-
-	RETRYINFO:
-		// Sleep, we just do a constant poll every 5 seconds. I haven't yet
-		// found any rate limits to the service so this seems okay.
-		time.Sleep(5 * time.Second)
 	}
 
 	logResult := &Log{JobId: uuid}
 	for {
-		// Update the log. It is possible for this to return a nil log
-		// and we dont' ever want to set result to nil so we have a check.
-		newLogResult, err := log(ctx, logResult.JobId, opts)
-		if newLogResult != nil {
-			logResult = newLogResult
-		}
-
+		// Update the log. It is possible for this to return a nil log, and we don't ever want to set result to nil,
+		// so we have a check.
+		logResult, err = log(ctx, logResult.JobId, opts)
 		if err != nil {
 			// This code is the network became unavailable error. If this
 			// happens then we just log and retry.
-			if e, ok := err.(Errors); ok && e.ContainsCode(-19000) {
+			var e Errors
+			if errors.As(err, &e) && e.ContainsCode(-19000) {
 				logger.Warn("error that network became unavailable, will retry")
-				goto RETRYLOG
+				// Wait for 5 seconds and try again. I haven't yet found any rate limits to the service so this
+				// seems okay.
+				<-time.After(5 * time.Second)
+				continue
 			}
 
 			return infoResult, logResult, err
@@ -167,17 +167,12 @@ func Notarize(ctx context.Context, opts *Options) (*Info, *Log, error) {
 		if logResult.Status == "Accepted" || logResult.Status == "Invalid" {
 			break
 		}
-
-	RETRYLOG:
-		// Sleep, we just do a constant poll every 5 seconds. I haven't yet
-		// found any rate limits to the service so this seems okay.
-		time.Sleep(5 * time.Second)
 	}
 
 	// If we're in an invalid status then return an error
 	err = nil
 	if logResult.Status == "Invalid" && infoResult.Status == "Invalid" {
-		err = fmt.Errorf("package is invalid.")
+		err = fmt.Errorf("package is invalid")
 	}
 
 	return infoResult, logResult, err

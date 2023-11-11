@@ -33,17 +33,13 @@ func upload(ctx context.Context, opts *Options) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		cmd.Path = path
-	}
 
-	cmd.Args = []string{
-		filepath.Base(cmd.Path),
-		"notarytool",
-		"submit", opts.File,
-		"--apple-id", opts.DeveloperId,
-		"--password", opts.Password,
-		"--team-id", opts.Provider,
-		"--output-format", "plist",
+		cmd = *(exec.CommandContext(
+			ctx, path,
+			filepath.Base(cmd.Path), "notarytool", "submit", opts.File,
+			"--apple-id", opts.DeveloperId, "--password", opts.Password, "--team-id", opts.Provider,
+			"--output-format", "plist",
+		))
 	}
 
 	// We store all output in out for logging and in case there is an error
