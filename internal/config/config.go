@@ -72,6 +72,9 @@ type Sign struct {
 	EntitlementsFile string `hcl:"entitlements_file,optional"`
 	// Specific to request a --deep codesigning.
 	Deep bool `hcl:"deep,optional"`
+	// Requirements is used to pass requirements to the codesign binary.
+	// See https://developer.apple.com/library/archive/technotes/tn2206/_index.html#//apple_ref/doc/uid/DTS40007919-CH1-TNTAG6
+	Requirements string `hcl:"requirements,optional"`
 }
 
 // Dmg are the options for a dmg file as output.
