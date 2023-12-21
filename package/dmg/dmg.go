@@ -20,7 +20,7 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 
-	"github.com/mitchellh/gon/internal/createdmg"
+	"github.com/asahasrabuddhe/gon/internal/createdmg"
 )
 
 // Options are the options for creating the dmg archive.
